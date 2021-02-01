@@ -1,25 +1,28 @@
-version: 2.1
-
-orbs:
-  python: circleci/python@1.2
-
-workflows:
-  sample:
-    jobs:
-      - build-and-test
+version: 2
 jobs:
-  build-and-test:  
+  tslint:
     docker:
-      - image: cimg/python:3.8
-    working_directory: ~/repo
+      - image: circleci/node
     steps:
       - checkout
       - run:
-          name: install update
-          command: 
-            sudo apt-get update && sudo apt-get upgrade -y
+          command: |
+            cd js/
+            npm install
+            npm run lint
+  black:
+    docker:
+      - image: circleci/python
+    steps:
+      - checkout
       - run:
-          name: test work or not code
-          command: 
-            ./run
-          no_output_timeout: 290m
+          command: |
+            cd
+            sudo pip install black
+            black --check $(pwd)/
+workflows:
+  version: 2
+  style_check:
+    jobs:
+      - tslint
+      - black
